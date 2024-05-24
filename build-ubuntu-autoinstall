@@ -1,0 +1,22 @@
+#!/usr/bin/bash
+
+name="test-instance"
+cpus=4
+mem=8G
+disk=20G
+imagefile=/mnt/enchilada/iso/Ubuntu/ubuntu-22.04.4-live-server-amd64.iso
+pwd=mia123
+
+file_USER_DATA=
+
+
+
+
+virt-install \
+    --name $name \
+    --memory $mem \
+    --vcpus=${cpus} \
+    --osinfo ubuntu22.04 \
+    --cdrom ~/iso/ubuntu-22.04.4-live-server-amd64.iso \
+    --cloud-init="meta-data=./meta-data,user-data=./user-data" \
+    --autoconsole graphical
