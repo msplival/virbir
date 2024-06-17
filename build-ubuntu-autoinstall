@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 # mandatory
-vm_name="test-instance"
+vm_name="minikube-ssh"
 
 # defaults, but configurable 
 vm_cpus=4
