@@ -1,23 +1,65 @@
 #!/usr/bin/bash
 
 # mandatory
-name="test-instance"
+vm_name="test-instance"
 
 # defaults, but configurable 
-cpus=4
-mem=8G
-disk=20G
+vm_cpus=4
+vm_mem=8192
+vm_disk=20G
+vm_storagepool=default
 imagefile=/mnt/enchilada/iso/Ubuntu/ubuntu-22.04.4-live-server-amd64.iso
-pwd=mia123
+vm_user=mario
+vm_importid="gh:msplival"
+vm_pwd=ubuntu
 
-file_USER_DATA=
+hashed_passwrod=$(mkpasswd --method=SHA-512 "$vm_pwd")
+
+workTempDir=$(mktemp -d)
+
+autoinstall_yaml=$(cat <<EOF
+autoinstall:
+  version: 1
+  identity:
+    hostname: $vm_name
+    password: "$hashed_password" #ubuntu
+    username: $vm_user
+  locale: en_US
+  storage:
+    layout:
+      name: direct
+  # seems these are needed for 24.04      
+  ssh:
+    install-server: true
+  packages:
+    - ssh-import-id
+  user-data: 
+    package_upgrade: true
+    apt:
+      http_proxy: 'http://192.168.10.2:3142/'
+    users:
+    - name: $vm_user
+      ssh_import_id:
+        - $vm_importid
+      sudo: ALL=(ALL) NOPASSWD:ALL
+      groups: sudo,admin,adm
+      shell: /bin/bash
+      lock_passwd: false
+EOF
+)
+
+echo $autoinstall_yaml > $workTempDir/user-data
+touch $workTempDir/meta-data
 
 
 virt-install \
-    --name $name \
-    --memory $mem \
-    --vcpus=${cpus} \
+    --name $vm_name \
+    --memory $vm_mem \
+    --vcpus=${vm_cpus} \
     --osinfo ubuntu22.04 \
     --cdrom "${imagefile}" \
-    --cloud-init="meta-data=./meta-data,user-data=<(cat ./user-data)" \
+    --cloud-init="meta-data=$workTempDir/meta-data,user-data=$workTempDir/user-data" \
     --autoconsole graphical
+
+
+
