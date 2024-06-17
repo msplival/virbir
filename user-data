@@ -9,6 +9,11 @@ autoinstall:
   storage:
     layout:
       name: direct
+  # seems these are needed for 24.04      
+  ssh:
+    install-server: true
+  packages:
+    - ssh-import-id
   user-data: 
     package_upgrade: true
     apt:
