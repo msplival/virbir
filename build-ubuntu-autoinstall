@@ -1,6 +1,9 @@
 #!/usr/bin/bash
 
+# mandatory
 name="test-instance"
+
+# defaults, but configurable 
 cpus=4
 mem=8G
 disk=20G
@@ -8,8 +11,6 @@ imagefile=/mnt/enchilada/iso/Ubuntu/ubuntu-22.04.4-live-server-amd64.iso
 pwd=mia123
 
 file_USER_DATA=
-
-
 
 
 virt-install \
