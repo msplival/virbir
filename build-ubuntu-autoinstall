@@ -18,6 +18,6 @@ virt-install \
     --memory $mem \
     --vcpus=${cpus} \
     --osinfo ubuntu22.04 \
-    --cdrom ~/iso/ubuntu-22.04.4-live-server-amd64.iso \
-    --cloud-init="meta-data=./meta-data,user-data=./user-data" \
+    --cdrom "${imagefile}" \
+    --cloud-init="meta-data=./meta-data,user-data=<(cat ./user-data)" \
     --autoconsole graphical
