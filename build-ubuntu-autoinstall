@@ -48,7 +48,7 @@ autoinstall:
 EOF
 )
 
-echo -e $autoinstall_yaml > $workTempDir/user-data
+echo  "$autoinstall_yaml" > $workTempDir/user-data
 touch $workTempDir/meta-data
 
 echo $workTempDir/user-data
