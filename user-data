@@ -1,0 +1,23 @@
+#cloud-config
+autoinstall:
+  version: 1
+  identity:
+    hostname: jam-test
+    password: "$6$exDY1mhS4KUYCE/2$zmn9ToZwTKLhCw.b4/b.ZRTIZM30JZ4QrOQ2aOXJ8yk96xpcCof0kxKwuX1kqLG/ygbJ1f8wxED22bTL4F46P0" #ubuntu
+    username: mario
+  locale: en_US
+  storage:
+    layout:
+      name: direct
+  user-data: 
+    package_upgrade: true
+    apt:
+      http_proxy: 'http://192.168.10.2:3142/'
+    users:
+    - name: mario
+      ssh_import_id:
+        - gh:msplival
+      sudo: ALL=(ALL) NOPASSWD:ALL
+      groups: sudo,admin,adm
+      shell: /bin/bash
+      lock_passwd: false
