@@ -50,6 +50,7 @@ EOF
 )
 
 echo  "$autoinstall_yaml" > $workTempDir/user-data
+touch $workTempDir/meta-data
 
 virt-install \
     --name $vm_name \
