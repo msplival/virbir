@@ -17,36 +17,20 @@ hashed_passwrod=$(mkpasswd --method=SHA-512 "$vm_pwd")
 
 workTempDir=$(mktemp -d)
 
+USERNAME=mario
+USER_SHELL=bash
+
 autoinstall_yaml=$(cat <<EOF
-autoinstall:
-  version: 1
-  identity:
-    hostname: $vm_name
-    password: "$hashed_password" #ubuntu
-    username: $vm_user
-  locale: en_US
-  storage:
-    layout:
-      name: direct
-  # seems these are needed for 24.04      
-  ssh:
-    install-server: true
-  packages:
-    - ssh-import-id
-  user-data: 
-    package_upgrade: true
-    apt:
-      http_proxy: 'http://192.168.10.2:3142/'
-    users:
-    - name: $vm_user
-      ssh_import_id:
-        - $vm_importid
-      sudo: ALL=(ALL) NOPASSWD:ALL
-      groups: sudo,admin,adm
-      shell: /bin/bash
-      lock_passwd: false
+#cloud-config
+users:
+  - name: $USERNAME
+    shell: $USER_SHELL
+
+package_update: true
+package_upgrade: true
 EOF
 )
+
 
 echo -e $autoinstall_yaml > $workTempDir/user-data
 touch $workTempDir/meta-data
