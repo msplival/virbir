@@ -48,10 +48,13 @@ autoinstall:
 EOF
 )
 
-echo $autoinstall_yaml > $workTempDir/user-data
+echo -e $autoinstall_yaml > $workTempDir/user-data
 touch $workTempDir/meta-data
 
+echo $workTempDir/user-data
+cat $workTempDir/user-data
 
+exit 5
 virt-install \
     --name $vm_name \
     --memory $vm_mem \
