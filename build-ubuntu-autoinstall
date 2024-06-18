@@ -1,11 +1,15 @@
 #!/usr/bin/bash
 
+# this option is mandatory
 name="test-instance"
+
+# these options have default in config file but can be overriden
 cpus=4
 mem=8G
 disk=20G
 imagefile=/mnt/enchilada/iso/Ubuntu/ubuntu-22.04.4-live-server-amd64.iso
 pwd=mia123
+apt_proxy=http://10.5.0.1:3142  # watch for the IP, should be from virb0 not from lxcbr
 
 file_USER_DATA=
 
