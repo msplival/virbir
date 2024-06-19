@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 # mandatory
-vm_name="minikube-ssh"
+vm_name="minikube-sshgit d"
 
 # defaults, but configurable 
 vm_cpus=4
