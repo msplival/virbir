@@ -3,20 +3,41 @@
 
 ARGS=$(getopt -o nicmdp --long name,image,cpus,memory,disksize,pool -n "virbir")
 
-# mandatory
-vm_name="minikube-sshgit d"
+eval set -- "$ARGS"
 
 # defaults, but configurable 
-vm_cpus=4
-vm_mem=8192
+vm_cpus=1
+vm_mem=1024
 vm_disk=20G
-vm_storagepool=nvme
-imagefile=/mnt/enchilada/iso/Ubuntu/ubuntu-22.04.4-live-server-amd64.iso
-vm_user=mario
-vm_importid="gh:msplival"
+vm_storagepool=default
+vm_user=$USER
+vm_importid="gh_msplival"
 vm_pwd=ubuntu
 
-hashed_passwrod=$(mkpasswd --method=SHA-512 "$vm_pwd")
+while true; do
+    case "$1" in
+    -n | --name ) vm_name="$2"; shift 2;; 
+    -i | --image ) imagefile="$2"; shift 2;;
+    -c | --cpus ) vm_cpus="$2"; shift 2;;
+    -m | --memory ) vm_mem="$2"; shift 2;;
+    -d | --disksize ) vm_disk="$2"; shift 2;;
+    -p | --pool ) vm_storagepool="$2"; shift 2;;
+    --) shift ; break ;;
+    esac
+    shift
+done
+
+if [[ -z $vm_name ]]; then
+  echo "Please provide virtual machina name."
+  exit 1
+fi
+
+if [[ -z $imagefile ]]; then 
+  echo "Please provide iso image to boot from."
+  exit 2
+fi
+
+hashed_password=$(mkpasswd --method=SHA-512 "$vm_pwd")
 
 workTempDir=$(mktemp -d)
 
@@ -52,17 +73,17 @@ autoinstall:
 EOF
 )
 
-echo  "$autoinstall_yaml" > $workTempDir/user-data
-touch $workTempDir/meta-data
+echo  "$autoinstall_yaml" > "$workTempDir"/user-data
+touch "$workTempDir"/meta-data
 
 virt-install \
-    --name $vm_name \
-    --memory $vm_mem \
-    --vcpus=${vm_cpus} \
+    --name "$vm_name" \
+    --memory "$vm_mem" \
+    --vcpus="${vm_cpus}" \
     --osinfo ubuntu22.04 \
     --cdrom "${imagefile}" \
     --cloud-init="meta-data=$workTempDir/meta-data,user-data=$workTempDir/user-data" \
     --autoconsole graphical
 
-rm -rf $workTempDir
+rm -rf "$workTempDir"
 
