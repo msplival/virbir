@@ -1,5 +1,8 @@
 #!/usr/bin/bash
 
+
+ARGS=$(getopt -o nicmdp --long name,image,cpus,memory,disksize,pool -n "virbir")
+
 # mandatory
 vm_name="minikube-sshgit d"
 
