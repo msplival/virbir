@@ -2,11 +2,11 @@
 
 # defaults, but configurable 
 vm_cpus=2
-vm_mem=2048
+vm_mem=4096
 vm_disk=20G
 vm_storagepool=default
 vm_user=$USER
-vm_importid="gh_msplival"
+vm_importid="gh-msplival"
 vm_pwd=ubuntu
 
 FOO=$(getopt -o n:i:cmdp --longoptions name:,image:,cpus,memory,disksize,pool -n "virbir" -- "$@" )
