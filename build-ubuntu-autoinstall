@@ -1,19 +1,16 @@
 #!/usr/bin/bash
 
-
-ARGS=$(getopt -o nicmdp --long name,image,cpus,memory,disksize,pool -n "virbir")
-
-eval set -- "$ARGS"
-
 # defaults, but configurable 
-vm_cpus=1
-vm_mem=1024
+vm_cpus=2
+vm_mem=2048
 vm_disk=20G
 vm_storagepool=default
 vm_user=$USER
 vm_importid="gh_msplival"
 vm_pwd=ubuntu
 
+FOO=$(getopt -o n:i:cmdp --longoptions name:,image:,cpus,memory,disksize,pool -n "virbir" -- "$@" )
+eval set -- "$FOO"
 while true; do
     case "$1" in
     -n | --name ) vm_name="$2"; shift 2;; 
@@ -24,7 +21,6 @@ while true; do
     -p | --pool ) vm_storagepool="$2"; shift 2;;
     --) shift ; break ;;
     esac
-    shift
 done
 
 if [[ -z $vm_name ]]; then
@@ -61,7 +57,7 @@ autoinstall:
   user-data: 
     package_upgrade: true
     apt:
-      http_proxy: 'http://192.168.10.2:3142/'
+      http_proxy: 'http://192.168.122.1:3142/'
     users:
     - name: $vm_user
       ssh_import_id:
