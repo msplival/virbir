@@ -9,7 +9,7 @@ vm_user=$USER
 vm_importid="gh-msplival"
 vm_pwd=ubuntu
 
-FOO=$(getopt -o n:i:c::m::d::p:: --longoptions name:,image:,cpus::,memory::,disksize::,pool:: -n "virbir" -- "$@" )
+FOO=$(getopt -o n:i:c:m:d:p: --longoptions name:,image:,cpus:,memory:,disksize:,pool: -n "virbir" -- "$@" )
 eval set -- "$FOO"
 while true; do
     case "$1" in
@@ -34,7 +34,6 @@ if [[ -z $imagefile ]]; then
 fi
 
 hashed_password=$(mkpasswd --method=SHA-512 "$vm_pwd")
-
 workTempDir=$(mktemp -d)
 
 autoinstall_yaml=$(cat <<EOF
