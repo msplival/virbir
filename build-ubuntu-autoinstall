@@ -1,13 +1,17 @@
 #!/usr/bin/bash
 
-# defaults, but configurable 
-vm_cpus=2
-vm_mem=4096
-vm_disk=20
-vm_storagepool=default
-vm_user=$USER
-vm_importid="gh-msplival"
-vm_pwd=ubuntu
+if [[ -f ~/.virbir.rc ]]; then
+  . ~/.virbir.rc
+fi
+
+# set defaults, override from config file if it exists
+vm_cpus=${cpus:-2}
+vm_mem=${memory:-4096}
+vm_disk=${disksize:-20}
+vm_storagepool=${pool:-default}
+vm_user=${vm_user:-$USER}
+vm_importid=${vm_importid:-"gh-msplival"}
+vm_pwd=${vm_pwd:-"ubuntu"}
 
 FOO=$(getopt -o n:i:c:m:d:p: --longoptions name:,image:,cpus:,memory:,disksize:,pool: -n "virbir" -- "$@" )
 eval set -- "$FOO"
