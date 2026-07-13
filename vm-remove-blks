@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PARENT="nvme-zfs/kvm"
+
+VM="${1:?usage: vm-detach-blk VM}"
+sudo virsh dominfo "$VM" >/dev/null
+
+echo "VM=$VM"
+echo "PARENT=$PARENT"
+echo
+
+sudo virsh domblklist "$VM" --details | awk '$2 == "disk" {print $3, $4}' |
+while read -r target source; do
+  case "$source" in
+    /dev/zvol/$PARENT/$VM-blk-[0-9][0-9])
+      zvol="${source#/dev/zvol/}"
+
+      echo "detaching $target -> $source"
+      sudo virsh detach-disk "$VM" "$target" --persistent
+
+      echo "destroying zvol: $zvol"
+      sudo zfs destroy "$zvol"
+
+      echo "done: $target / $zvol"
+      echo
+      ;;
+  esac
+done

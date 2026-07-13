@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PARENT="nvme-zfs/kvm"
+AMOUNT=5
+SIZE="1G"
+THIN=0
+
+VM="${1:?usage: vm-attach-blk VM [--amount N] [--size SIZE] [--thin]}"
+shift
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --amount) AMOUNT="$2"; shift 2 ;;
+    --size)   SIZE="$2"; shift 2 ;;
+    --thin)   THIN=1; shift ;;
+    *) echo "unknown option: $1" >&2; exit 1 ;;
+  esac
+done
+
+sudo virsh dominfo "$VM" >/dev/null
+
+echo "VM=$VM"
+echo "PARENT=$PARENT"
+echo "AMOUNT=$AMOUNT"
+echo "SIZE=$SIZE"
+echo "THIN=$THIN"
+
+for i in $(seq 0 $((AMOUNT - 1))); do
+  n=$(printf "%02d" "$i")
+  devletter=$(printf "\\$(printf '%03o' $((98+i)))")   # b,c,d...
+  zvol="$PARENT/$VM-blk-$n"
+  dev="/dev/zvol/$zvol"
+  target="vd$devletter"
+
+  echo "creating zvol: $zvol size=$SIZE"
+  if [[ "$THIN" -eq 1 ]]; then
+    sudo zfs create -s -V "$SIZE" "$zvol"
+  else
+    sudo zfs create -V "$SIZE" "$zvol"
+  fi
+
+  echo "attaching $dev as $target"
+  sudo virsh attach-disk "$VM" "$dev" "$target" \
+    --targetbus virtio \
+    --driver qemu \
+    --subdriver raw \
+    --cache none \
+    --io native \
+    --persistent
+
+  echo "done: $zvol -> $target"
+done
