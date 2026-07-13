@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PARENT="nvme-zfs/kvm"
+POOL="default"
 AMOUNT=5
 SIZE="1G"
 THIN=0
 
-VM="${1:?usage: vm-attach-blk VM [--amount N] [--size SIZE] [--thin]}"
+VM="${1:?usage: vm-attach-blk VM [--pool POOL] [--amount N] [--size SIZE] [--thin]}"
 shift
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --pool)   POOL="$2"; shift 2 ;;
     --amount) AMOUNT="$2"; shift 2 ;;
     --size)   SIZE="$2"; shift 2 ;;
     --thin)   THIN=1; shift ;;
@@ -18,30 +19,36 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-sudo virsh dominfo "$VM" >/dev/null
+virsh dominfo "$VM" >/dev/null
+virsh pool-info "$POOL" >/dev/null
 
 echo "VM=$VM"
-echo "PARENT=$PARENT"
+echo "POOL=$POOL"
 echo "AMOUNT=$AMOUNT"
 echo "SIZE=$SIZE"
 echo "THIN=$THIN"
+echo
 
 for i in $(seq 0 $((AMOUNT - 1))); do
   n=$(printf "%02d" "$i")
   devletter=$(printf "\\$(printf '%03o' $((98+i)))")   # b,c,d...
-  zvol="$PARENT/$VM-blk-$n"
-  dev="/dev/zvol/$zvol"
+  vol="$VM-blk-$n"
   target="vd$devletter"
 
-  echo "creating zvol: $zvol size=$SIZE"
+  echo "creating libvirt volume: pool=$POOL name=$vol size=$SIZE"
+
   if [[ "$THIN" -eq 1 ]]; then
-    sudo zfs create -s -V "$SIZE" "$zvol"
+    virsh vol-create-as "$POOL" "$vol" "$SIZE" --allocation 0
   else
-    sudo zfs create -V "$SIZE" "$zvol"
+    virsh vol-create-as "$POOL" "$vol" "$SIZE"
   fi
 
-  echo "attaching $dev as $target"
-  sudo virsh attach-disk "$VM" "$dev" "$target" \
+  path="$(virsh vol-path --pool "$POOL" "$vol")"
+
+  echo "volume path: $path"
+  echo "attaching to $VM as $target"
+
+  virsh attach-disk "$VM" "$path" "$target" \
     --targetbus virtio \
     --driver qemu \
     --subdriver raw \
@@ -49,5 +56,7 @@ for i in $(seq 0 $((AMOUNT - 1))); do
     --io native \
     --persistent
 
-  echo "done: $zvol -> $target"
+  echo "done: $vol -> $target"
+  echo
 done
+
